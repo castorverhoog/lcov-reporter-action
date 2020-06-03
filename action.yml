@@ -1,5 +1,5 @@
-name: Code Coverage Report (test)
-description: Comments a pull request with the code coverage
+name: Harman's Code Coverage Report
+description: Comments a pull request with the code coverage, deletes previous comments.
 author: Harman
 branding:
   icon: check-square
