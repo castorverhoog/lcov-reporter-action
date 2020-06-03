@@ -5,6 +5,8 @@ import { GitHub, context } from "@actions/github"
 import { parse } from "./lcov"
 import { diff } from "./comment"
 
+const COVERAGE_HEADER = ":loop: **Code coverage**\n\n";
+
 async function main() {
 	const token = core.getInput("github-token")
 	const lcovFile = core.getInput("lcov-file") || "./coverage/lcov.info"
@@ -31,14 +33,37 @@ async function main() {
 
 	const lcov = await parse(raw)
 	const baselcov = baseRaw && await parse(baseRaw)
-	const body = diff(lcov, baselcov, options)
+	const body = COVERAGE_HEADER + diff(lcov, baselcov, options)
 
-	await new GitHub(token).issues.createComment({
+	const ghClient = new GitHub(token);
+
+	await deletePreviousComments(ghClient);
+
+	await ghClient.issues.createComment({
 		repo: context.repo.repo,
 		owner: context.repo.owner,
 		issue_number: context.payload.pull_request.number,
-		body: diff(lcov, baselcov, options),
+		body
 	})
+}
+
+async function deletePreviousComments(ghClient) {
+	const { data } = await ghClient.issues.listComments({
+		...context.repo,
+		per_page: 100,
+		issue_number: context.payload.pull_request.number,
+	})
+	return Promise.all(
+		data
+			.filter(
+				(c) =>
+					c.user.login === "github-actions[bot]" &&
+					c.body.startsWith(COVERAGE_HEADER),
+			)
+			.map((c) =>
+				ghClient.issues.deleteComment({ ...context.repo, comment_id: c.id }),
+			),
+	)
 }
 
 main().catch(function(err) {
