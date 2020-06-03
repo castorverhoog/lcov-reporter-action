@@ -22917,6 +22917,8 @@ function diff(lcov, before, options) {
 	)
 }
 
+const COVERAGE_HEADER = ":loop: **Code coverage**\n\n";
+
 async function main$1() {
 	const token = core$1.getInput("github-token");
 	const lcovFile = core$1.getInput("lcov-file") || "./coverage/lcov.info";
@@ -22943,14 +22945,37 @@ async function main$1() {
 
 	const lcov = await parse$2(raw);
 	const baselcov = baseRaw && await parse$2(baseRaw);
-	const body = diff(lcov, baselcov, options);
+	const body = COVERAGE_HEADER + diff(lcov, baselcov, options);
 
-	await new github_2(token).issues.createComment({
+	const ghClient = new github_2(token);
+
+	await deletePreviousComments(ghClient);
+
+	await ghClient.issues.createComment({
 		repo: github_1.repo.repo,
 		owner: github_1.repo.owner,
 		issue_number: github_1.payload.pull_request.number,
-		body: diff(lcov, baselcov, options),
+		body
 	});
+}
+
+async function deletePreviousComments(ghClient) {
+	const { data } = await ghClient.issues.listComments({
+		...github_1.repo,
+		per_page: 100,
+		issue_number: github_1.payload.pull_request.number,
+	});
+	return Promise.all(
+		data
+			.filter(
+				(c) =>
+					c.user.login === "github-actions[bot]" &&
+					c.body.startsWith(COVERAGE_HEADER),
+			)
+			.map((c) =>
+				ghClient.issues.deleteComment({ ...github_1.repo, comment_id: c.id }),
+			),
+	)
 }
 
 main$1().catch(function(err) {
