@@ -22918,6 +22918,7 @@ function diff(lcov, before, options) {
 }
 
 const COVERAGE_HEADER = ":loop: **Code coverage**\n\n";
+const CHECK_RUN_TITLE = "Code Coverage Report";
 
 async function main$1() {
 	const token = core$1.getInput("github-token");
@@ -22949,6 +22950,21 @@ async function main$1() {
 
 	const ghClient = new github_2(token);
 
+	const checkRes = await ghClient.checks.create({
+		repo: github_1.repo.repo,
+		owner: github_1.repo.owner,
+		name: CHECK_RUN_TITLE,
+		status: "completed",
+		head_sha: github_1.payload.pull_request.head.sha,
+		conclusion: "success",
+		output: {
+			title: CHECK_RUN_TITLE,
+			summary: body
+		}
+	});
+
+	console.log(`Report created at: ${checkRes.data.details_url}`);
+	
 	await deletePreviousComments(ghClient);
 
 	await ghClient.issues.createComment({
@@ -22956,19 +22972,6 @@ async function main$1() {
 		owner: github_1.repo.owner,
 		issue_number: github_1.payload.pull_request.number,
 		body
-	});
-
-	await ghClient.checks.create({
-		repo: github_1.repo.repo,
-		owner: github_1.repo.owner,
-		name: COVERAGE_HEADER,
-		status: "completed",
-		head_sha: github_1.payload.pull_request.head.sha,
-		conclusion: "neutral",
-		output: {
-			title: COVERAGE_HEADER,
-			summary: body
-		}
 	});
 }
 
