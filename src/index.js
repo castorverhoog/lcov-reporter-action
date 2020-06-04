@@ -52,6 +52,7 @@ async function main() {
 		name: COVERAGE_HEADER,
 		status: "completed",
 		head_sha: context.payload.pull_request.head.sha,
+		conclusion: "neutral",
 		output: {
 			title: COVERAGE_HEADER,
 			summary: body
