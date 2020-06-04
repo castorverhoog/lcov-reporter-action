@@ -22886,7 +22886,7 @@ function comment (lcov, options) {
 		`Coverage after merging ${b(options.head)} into ${b(options.base)}`,
 		table(tbody(tr(th(percentage(lcov).toFixed(2), "%")))),
 		"\n\n",
-		details(summary("Coverage Report"), tabulate(lcov, options)),
+		options.headersOnly ? '' : details(summary("Coverage Report"), tabulate(lcov, options)),
 	)
 }
 
@@ -22913,10 +22913,11 @@ function diff(lcov, before, options) {
 			th(arrow, " ", plus, pdiff.toFixed(2), "%"),
 		))),
 		"\n\n",
-		details(summary("Coverage Report"), tabulate(lcov, options)),
+		options.headersOnly ? '': details(summary("Coverage Report"), tabulate(lcov, options)),
 	)
 }
 
+const MAX_COMMENT_SIZE = 65536;
 const COVERAGE_HEADER = ":loop: **Code coverage**\n\n";
 const CHECK_RUN_TITLE = "Code Coverage Report";
 
@@ -22946,9 +22947,12 @@ async function main$1() {
 
 	const lcov = await parse$2(raw);
 	const baselcov = baseRaw && await parse$2(baseRaw);
-	const body = COVERAGE_HEADER + diff(lcov, baselcov, options);
+	let body = COVERAGE_HEADER + diff(lcov, baselcov, options);
+
+	console.log(`Body length: ${body.length}`);
 
 	const ghClient = new github_2(token);
+	body = body.length > MAX_COMMENT_SIZE ? COVERAGE_HEADER + diff(lcov, baselcov, {...options, headersOnly: true}) : body;
 
 	const checkRes = await ghClient.checks.create({
 		repo: github_1.repo.repo,
@@ -22971,7 +22975,7 @@ async function main$1() {
 		repo: github_1.repo.repo,
 		owner: github_1.repo.owner,
 		issue_number: github_1.payload.pull_request.number,
-		body
+		body: body.length > MAX_COMMENT_SIZE ? COVERAGE_HEADER + `See ${checkRes.data.details_url} for coverage` : body
 	});
 }
 

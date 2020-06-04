@@ -5,6 +5,7 @@ import { GitHub, context } from "@actions/github"
 import { parse } from "./lcov"
 import { diff } from "./comment"
 
+const MAX_COMMENT_SIZE = 65536;
 const COVERAGE_HEADER = ":loop: **Code coverage**\n\n";
 const CHECK_RUN_TITLE = "Code Coverage Report";
 
@@ -34,9 +35,12 @@ async function main() {
 
 	const lcov = await parse(raw)
 	const baselcov = baseRaw && await parse(baseRaw)
-	const body = COVERAGE_HEADER + diff(lcov, baselcov, options)
+	let body = COVERAGE_HEADER + diff(lcov, baselcov, options)
+
+	console.log(`Body length: ${body.length}`);
 
 	const ghClient = new GitHub(token);
+	body = body.length > MAX_COMMENT_SIZE ? COVERAGE_HEADER + diff(lcov, baselcov, {...options, headersOnly: true}) : body;
 
 	const checkRes = await ghClient.checks.create({
 		repo: context.repo.repo,
@@ -59,7 +63,7 @@ async function main() {
 		repo: context.repo.repo,
 		owner: context.repo.owner,
 		issue_number: context.payload.pull_request.number,
-		body
+		body: body.length > MAX_COMMENT_SIZE ? COVERAGE_HEADER + `See ${checkRes.data.details_url} for coverage` : body
 	});
 }
 
