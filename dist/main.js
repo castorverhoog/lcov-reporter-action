@@ -22964,6 +22964,7 @@ async function main$1() {
 		name: COVERAGE_HEADER,
 		status: "completed",
 		head_sha: github_1.payload.pull_request.head.sha,
+		conclusion: "neutral",
 		output: {
 			title: COVERAGE_HEADER,
 			summary: body
