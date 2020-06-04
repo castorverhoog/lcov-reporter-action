@@ -22957,6 +22957,18 @@ async function main$1() {
 		issue_number: github_1.payload.pull_request.number,
 		body
 	});
+
+	await ghClient.checks.create({
+		repo: github_1.repo.repo,
+		owner: github_1.repo.owner,
+		name: COVERAGE_HEADER,
+		status: "completed",
+		head_sha: github_1.payload.pull_request.head.sha,
+		output: {
+			title: COVERAGE_HEADER,
+			summary: body
+		}
+	});
 }
 
 async function deletePreviousComments(ghClient) {
