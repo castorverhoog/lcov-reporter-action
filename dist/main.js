@@ -22944,15 +22944,15 @@ async function main$1() {
 		head: github_1.payload.pull_request.head.ref,
 		base: github_1.payload.pull_request.base.ref,
 	};
-
+	const coverageHeader = `${github_1.workflow}: ${COVERAGE_HEADER}`;
 	const lcov = await parse$2(raw);
 	const baselcov = baseRaw && await parse$2(baseRaw);
-	let body = COVERAGE_HEADER + diff(lcov, baselcov, options);
+	let body = coverageHeader + diff(lcov, baselcov, options);
 
 	console.log(`Body length: ${body.length}`);
 
 	const ghClient = new github_2(token);
-	body = body.length > MAX_COMMENT_SIZE ? COVERAGE_HEADER + diff(lcov, baselcov, {...options, headersOnly: true}) : body;
+	body = body.length > MAX_COMMENT_SIZE ? coverageHeader + diff(lcov, baselcov, {...options, headersOnly: true}) : body;
 
 	const checkRes = await ghClient.checks.create({
 		repo: github_1.repo.repo,
@@ -22969,7 +22969,7 @@ async function main$1() {
 
 	console.log(`Report created at: ${checkRes.data.details_url}`);
 	
-	await deletePreviousComments(ghClient);
+	await deletePreviousComments(ghClient, coverageHeader);
 
 	await ghClient.issues.createComment({
 		repo: github_1.repo.repo,
@@ -22979,7 +22979,7 @@ async function main$1() {
 	});
 }
 
-async function deletePreviousComments(ghClient) {
+async function deletePreviousComments(ghClient, whatToLookFor) {
 	const { data } = await ghClient.issues.listComments({
 		...github_1.repo,
 		per_page: 100,
@@ -22990,7 +22990,7 @@ async function deletePreviousComments(ghClient) {
 			.filter(
 				(c) =>
 					c.user.login === "github-actions[bot]" &&
-					c.body.startsWith(COVERAGE_HEADER),
+					c.body.startsWith(whatToLookFor),
 			)
 			.map((c) =>
 				ghClient.issues.deleteComment({ ...github_1.repo, comment_id: c.id }),
