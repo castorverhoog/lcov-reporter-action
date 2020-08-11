@@ -26,6 +26,7 @@ async function main() {
 		prefix,
 		head: "feat/test",
 		base: "master",
+		fractions: false,
 	}
 	const result = diff(lcov, before, options);
 	// console.log(result)

@@ -5,9 +5,9 @@ import { isEqual, differenceWith } from "lodash";
 export function tabulateDiff(lcov, before, options) {
 	const head = tr(
 		th("File"),
-		th({colspan: 2}, "Branches"),
-		th({colspan: 2}, "Funcs"),
-		th({colspan: 2}, "Lines")
+		th({colspan: options.fractions ? 2 : 1}, "Branches"),
+		th({colspan: options.fractions ? 2 : 1}, "Funcs"),
+		th({colspan: options.fractions ? 2 : 1}, "Lines")
   )
   const removeDetails = report =>
     report.map(file => ({
@@ -66,15 +66,16 @@ export function tabulateDiff(lcov, before, options) {
 }
 
 
-function toFolder(path) {
+function toFolder(path, options) {
 	if (path === "") {
 		return ""
 	}
 
-	return tr(td({ colspan: 7 }, b(path)))
+	return tr(td({ colspan: options.fractions ? 7 : 4 }, b(path)))
 }
 
 function toRow(file, indent, options) {
+  if(options.fractions)
 	return tr(
     td(filename(file, indent, options)),
     td(fraction(file.after.branches, file.before.branches)),
@@ -83,7 +84,13 @@ function toRow(file, indent, options) {
 		td(percentage(file.after.functions, file.before.functions)),
 		td(fraction(file.after.lines, file.before.lines)),
 		td(percentage(file.after.lines, file.before.lines))
-	)
+  );
+  else return tr(
+    td(filename(file, indent, options)),
+		td(percentage(file.after.branches, file.before.branches)),
+		td(percentage(file.after.functions, file.before.functions)),
+		td(percentage(file.after.lines, file.before.lines))
+  )
 }
 
 function filename(file, indent, options) {
