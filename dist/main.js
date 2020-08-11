@@ -24284,9 +24284,9 @@ const fragment = function(...children) {
 function tabulate(lcov, options) {
 	const head = tr(
 		th("File"),
-		th("Branches"),
-		th("Funcs"),
-		th("Lines"),
+		th({colspan: options.fractions ? 2 : 1}, "Branches"),
+		th({colspan: options.fractions ? 2 : 1}, "Funcs"),
+		th({colspan: options.fractions ? 2 : 1}, "Lines"),
 		th("Uncovered Lines"),
 	);
 
@@ -24317,11 +24317,21 @@ function toFolder(path) {
 		return ""
 	}
 
-	return tr(td({ colspan: 5 }, b(path)))
+	return tr(td({ colspan: options.fractions ? 8 : 5 }, b(path)))
 }
 
 function toRow(file, indent, options) {
+	if(options.fractions)
 	return tr(
+    td(filename(file, indent, options)),
+    td(fraction(file.branches)),
+		td(percentage$1(file.branches)),
+		td(fraction(file.functions)),
+		td(percentage$1(file.functions)),
+		td(fraction(file.lines)),
+		td(percentage$1(file.lines))
+  );
+  else return tr(
 		td(filename(file, indent, options)),
 		td(percentage$1(file.branches)),
 		td(percentage$1(file.functions)),
@@ -24337,6 +24347,14 @@ function filename(file, indent, options) {
 	const last = parts[parts.length - 1];
 	const space = indent ? "&nbsp; &nbsp;" : "";
 	return fragment(space, last)//a({ href }, last))
+}
+
+function fraction(item) {
+  const value = `${item.hit}/${item.found}`;
+
+	const tag = item.hit === item.found ? fragment : b;
+
+  return tag(value);
 }
 
 function percentage$1(item) {
@@ -41518,9 +41536,9 @@ var lodash_2 = lodash.differenceWith;
 function tabulateDiff(lcov, before, options) {
 	const head = tr(
 		th("File"),
-		th({colspan: 2}, "Branches"),
-		th({colspan: 2}, "Funcs"),
-		th({colspan: 2}, "Lines")
+		th({colspan: options.fractions ? 2 : 1}, "Branches"),
+		th({colspan: options.fractions ? 2 : 1}, "Funcs"),
+		th({colspan: options.fractions ? 2 : 1}, "Lines")
   );
   const removeDetails = report =>
     report.map(file => ({
@@ -41569,7 +41587,7 @@ function tabulateDiff(lcov, before, options) {
 		.reduce(
 			(acc, key) => [
 				...acc,
-				toFolder$1(key),
+				toFolder$1(key, options),
 				...folders[key].map(file => toRow$1(file, key !== "", options)),
 			],
 			[],
@@ -41579,24 +41597,31 @@ function tabulateDiff(lcov, before, options) {
 }
 
 
-function toFolder$1(path) {
+function toFolder$1(path, options) {
 	if (path === "") {
 		return ""
 	}
 
-	return tr(td({ colspan: 7 }, b(path)))
+	return tr(td({ colspan: options.fractions ? 7 : 4 }, b(path)))
 }
 
 function toRow$1(file, indent, options) {
+  if(options.fractions)
 	return tr(
     td(filename$1(file, indent, options)),
-    td(fraction(file.after.branches, file.before.branches)),
+    td(fraction$1(file.after.branches, file.before.branches)),
 		td(percentage$2(file.after.branches, file.before.branches)),
-		td(fraction(file.after.functions, file.before.functions)),
+		td(fraction$1(file.after.functions, file.before.functions)),
 		td(percentage$2(file.after.functions, file.before.functions)),
-		td(fraction(file.after.lines, file.before.lines)),
+		td(fraction$1(file.after.lines, file.before.lines)),
 		td(percentage$2(file.after.lines, file.before.lines))
-	)
+  );
+  else return tr(
+    td(filename$1(file, indent, options)),
+		td(percentage$2(file.after.branches, file.before.branches)),
+		td(percentage$2(file.after.functions, file.before.functions)),
+		td(percentage$2(file.after.lines, file.before.lines))
+  )
 }
 
 function filename$1(file, indent, options) {
@@ -41608,7 +41633,7 @@ function filename$1(file, indent, options) {
 	return fragment(space, last)//a({ href }, last))
 }
 
-function fraction(item, beforeItem) {
+function fraction$1(item, beforeItem) {
   const value = `${item.hit}/${item.found}`;
   const beforeValue = `${beforeItem.hit}/${beforeItem.found}`;
 
