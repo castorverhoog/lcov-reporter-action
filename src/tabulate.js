@@ -56,7 +56,7 @@ function filename(file, indent, options) {
 	const parts = relative.split("/")
 	const last = parts[parts.length - 1]
 	const space = indent ? "&nbsp; &nbsp;" : ""
-	return fragment(space, a({ href }, last))
+	return fragment(space, last)//a({ href }, last))
 }
 
 function percentage(item) {
@@ -85,6 +85,7 @@ function uncovered(file, options) {
 
 	return all
 		.map(function(line) {
+			return line;
 			const relative = file.file.replace(options.prefix, "")
 			const href = `https://github.com/${options.repository}/blob/${options.commit}/${relative}#L${line}`
 			return a({ href }, line)
