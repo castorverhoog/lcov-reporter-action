@@ -19,7 +19,14 @@ export default {
 			preferBuiltins: true,
 			mainFields: [ "main" ],
 		}),
-		commonjs(),
+		commonjs({
+			namedExports: {
+					'node_modules/lodash/lodash.js': [
+							'isEqual',
+							'differenceWith'
+					]
+			}
+	}),
 		json(),
 	],
 }

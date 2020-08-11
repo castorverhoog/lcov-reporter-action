@@ -2,6 +2,7 @@ import { details, summary, b, fragment, table, tbody, tr, th } from "./html"
 
 import { percentage } from "./lcov"
 import { tabulate } from "./tabulate"
+import { tabulateDiff } from "./tabulateDiff"
 
 export function comment (lcov, options) {
 	return fragment(
@@ -20,13 +21,19 @@ export function diff(lcov, before, options) {
 	const pbefore = percentage(before)
 	const pafter = percentage(lcov)
 	const pdiff = pafter - pbefore
-	const plus = pdiff > 0 ? "+" : ""
+	const nodiff = pdiff === 0
+	const plus = nodiff ? "+" : ""
 	const arrow =
-		pdiff === 0
+		nodiff
 			? ""
 			: pdiff < 0
 				? "▾"
 				: "▴"
+	if(nodiff) return fragment(
+		`No difference in coverage between ${b(options.head)} and ${b(options.base)}.`,
+		"\n\n",
+		`Coverage: ${fragment(pafter.toFixed(2), "%")}`
+	)
 
 	return fragment(
 		`Coverage after merging ${b(options.head)} into ${b(options.base)}`,
@@ -35,6 +42,6 @@ export function diff(lcov, before, options) {
 			th(arrow, " ", plus, pdiff.toFixed(2), "%"),
 		))),
 		"\n\n",
-		options.headersOnly ? '': details(summary("Coverage Report"), tabulate(lcov, options)),
+		options.headersOnly ? '': details(summary("Coverage Report"), tabulateDiff(lcov, before, options)),
 	)
 }
