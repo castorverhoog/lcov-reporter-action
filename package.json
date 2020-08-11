@@ -15,22 +15,27 @@
 	"scripts": {
 		"build": "rollup -c",
 		"test": "jest --passWithNoTests --coverage",
-		"local": "babel-node src/cli",
+		"local-watch": "babel-watch src/cli \"head-result/lcov.info\" \"base-result/lcov.info\"",
+		"local": "babel-node src/cli \"head-result/lcov.info\" \"base-result/lcov.info\"",
 		"format": "prettier --write src/*.js src/**/*.js"
 	},
 	"dependencies": {
 		"@actions/core": "^1.2.0",
 		"@actions/github": "^1.1.0",
-		"lcov-parse": "^1.0.0"
+		"lcov-parse": "^1.0.0",
+		"lodash": "^4.17.19"
 	},
 	"devDependencies": {
-		"@babel/core": "^7.8.6",
-		"@babel/node": "^7.8.4",
-		"@babel/preset-env": "^7.8.6",
+		"@babel/cli": "^7.1.0",
+		"@babel/core": "^7.11.1",
+		"@babel/node": "^7.10.5",
+		"@babel/preset-env": "^7.11.0",
 		"@rollup/plugin-commonjs": "^11.0.2",
 		"@rollup/plugin-json": "^4.0.2",
 		"@rollup/plugin-node-resolve": "^7.1.1",
+		"babel-core": "^7.0.0-bridge.0",
 		"babel-jest": "^25.1.0",
+		"babel-watch": "^7.0.0",
 		"core-js": "3",
 		"jest": "^25.1.0",
 		"prettier": "^1.19.1",

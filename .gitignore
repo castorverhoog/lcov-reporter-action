@@ -1,2 +1,5 @@
 node_modules/
 coverage/
+result.html
+base-result/lcov.info
+head-result/lcov.info

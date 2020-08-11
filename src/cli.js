@@ -17,6 +17,7 @@ async function main() {
 	if (beforeFile) {
 		const content = await fs.readFile(beforeFile, "utf-8")
 		before = await parse(content)
+		// console.log(before);
 	}
 
 	const options = {
@@ -26,8 +27,11 @@ async function main() {
 		head: "feat/test",
 		base: "master",
 	}
+	const result = diff(lcov, before, options);
+	// console.log(result)
+	console.log(result.length, 65536);
 
-	console.log(diff(lcov, before, options))
+	fs.writeFile("result.html", result);
 }
 
 main().catch(function(err) {
