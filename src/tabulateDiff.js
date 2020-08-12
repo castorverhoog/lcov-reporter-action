@@ -35,11 +35,17 @@ export function tabulateDiff(lcov, before, options) {
       }
     }), {})
   const base = toObject(before)
+
   const combined = differenceWith(lcov, before, isEqual).map(file => ({
-    file: file.file,
-    before: base[file.file],
-    after: file
-  }))
+      file: file.file,
+      before: {
+        ...base[file.file]
+      },
+      after: {
+        ...file
+      }
+    })
+  )
 
   if(combined.length === 0) return ``;
 
@@ -48,8 +54,9 @@ export function tabulateDiff(lcov, before, options) {
 		const parts = file.file.replace(options.prefix, "").split("/")
 		const folder = parts.slice(0, -1).join("/")
 		folders[folder] = folders[folder] || []
-		folders[folder].push(file)
-	}
+    folders[folder].push(file)
+  }
+
 
 	const rows = Object.keys(folders)
 		.sort()
