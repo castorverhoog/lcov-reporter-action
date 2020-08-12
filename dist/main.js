@@ -41641,22 +41641,19 @@ function filename$1(file, indent, options) {
 }
 
 function fraction$1(item, beforeItem) {
-  const value = `${item.hit}/${item.found}`;
-  const beforeValue = `${beforeItem.hit}/${beforeItem.found}`;
+  const value = !item ? `N/A` : `${item.hit}/${item.found}`;
+  const beforeValue = !beforeItem ? `N/A` : `${beforeItem.hit}/${beforeItem.found}`;
 
   return fragment(del(beforeValue), " ", b(value));
 }
 
 function percentage$2(item, beforeItem) {
-	if (!item || !beforeItem) {
-		return "N/A"
-  }
   const round = (val) => val.toFixed(2).replace(/\.0*$/, "");
 
-  const value = item.found === 0 ? 100 : (item.hit / item.found) * 100;
-  const beforeValue = beforeItem.found === 0 ? 100 : (beforeItem.hit / beforeItem.found) * 100;
+  const value = !item ? 'N/A' : item.found === 0 ? `100%` : `${round((item.hit / item.found) * 100)}%`;
+  const beforeValue = !beforeItem ? 'N/A' : beforeItem.found === 0 ? `100%` : `${round((beforeItem.hit / beforeItem.found) * 100)}%`;
 
-  return fragment(del(`${round(beforeValue)}%`), " ", b(`${round(value)}%`))
+  return fragment(del(beforeValue), " ", b(value))
 }
 
 function comment (lcov, options) {
